@@ -30,15 +30,7 @@ Specifically:
 ## ⚙️ Methodology Overview
 
 1. **Data Acquisition**
-   - Source: **LobbyView database** ([https://lobbyview.org/](https://lobbyview.org/))
-   - Datasets used:
-     - `report_level.csv`
-     - `issue_level.csv`
-     - `issue_text.csv` (contains the free-text field of lobbying issue descriptions)
-   - Firm ideology scores are computed from PAC donation data:  
-     \[
-     \text{Ideology Score} = \frac{\text{Republican Donations}}{\text{Republican + Democratic Donations}}
-     \]
+   - Source: Synthetic data by ChatGPT 5.1
 
 2. **Data Cleaning and Preparation**
    - Merge issue-level text with report-level metadata and firm identifiers.
