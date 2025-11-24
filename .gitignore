@@ -1,0 +1,7 @@
+data/
+*.csv
+*.json
+*.pkl
+*.zip
+*.parquet
+*.xlsx
