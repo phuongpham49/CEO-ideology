@@ -86,12 +86,6 @@ Per-company merge to align text with ideology labels.
 
 project-root/
 │
-├── data/
-│   ├── fake_firm_interviews.csv
-│   ├── fake_pac_data.csv
-│   ├── fake_firm_interviews_cleaned.csv
-│   └── training_data.csv
-│
 ├── scripts/
 │   ├── generate_synthetic_interviews.py
 │   ├── generate_synthetic_pac.py
