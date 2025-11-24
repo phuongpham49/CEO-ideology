@@ -106,3 +106,28 @@ project-root/
 └── Project_Plan.tex
 
 
+---
+
+## 🔧 Installation
+
+```bash
+pip install -r requirements.txt
+
+Key packages:
+
+transformers
+
+torch
+
+pandas
+
+numpy
+
+scikit-learn
+
+captum
+
+tqdm
+
+regex
+
