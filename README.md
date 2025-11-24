@@ -3,84 +3,106 @@
 **Author:** Phuong Pham  
 **Affiliation:** University of Rochester  
 **Repository:** [https://github.com/phuongpham49/CEO-ideology](https://github.com/phuongpham49/CEO-ideology)  
-**Date:** October 2025  
+**Date:** November 2025  
 
 ---
 
-## 📘 Overview
+## 📌 Project Overview
 
-This project explores whether firms’ political orientations—revealed through their lobbying and campaign-finance activities—are systematically reflected in the language of their lobbying disclosures.  
-Building on In Song Kim’s *Political Cleavages of Firms* framework, the study uses the **LobbyView** database ([https://lobbyview.org/](https://lobbyview.org/)), which contains all U.S. federal lobbying reports and PAC contribution data since 1999.  
+This project investigates whether **corporate ideology** can be inferred from **firm-generated language**, using a **regression-fine-tuned RoBERTa transformer model**.
 
-Each lobbying report includes a *free-text issue description* in which firms describe the congressional bills, public laws, or regulatory topics they lobbied. These descriptions provide a rich corpus of political and economic framing language.  
-The project fine-tunes a **RoBERTa-base transformer model** to predict firm-level ideological scores (based on PAC donations) from these lobbying texts. The aim is to determine whether and how corporate ideology can be inferred directly from lobbying language.
+Because real CEO interview data from TDM ProQuest became inaccessible, I created **synthetic but realistic firm interview data** and paired it with **synthetic PAC contribution data**. This allows a fully reproducible pipeline while preserving the methodological goal of the original project.
 
----
+The project answers the following question:
 
-## 🎯 Research Question
-
-> **Can firms’ ideological orientations be inferred from the language used in their lobbying disclosures?**
-
-Specifically:
-- Do Republican-leaning and Democratic-leaning firms use systematically different linguistic frames in lobbying text?  
-- Can those differences be identified and quantified using transformer-based language models?
+> **Can transformer models identify ideological signals in firm communication, using PAC donation patterns as a numerical target?**
 
 ---
 
-## ⚙️ Methodology Overview
+## 🗂️ Dataset Description
 
-1. **Data Acquisition**
-   - Source: Synthetic data by ChatGPT 5.1
+### 1. `fake_firm_interviews.csv`
+Synthetic dataset containing ~5000 firm interviews.  
+Each row includes:
+- `interview_id`
+- `filename`
+- `company`
+- `industry`
+- `date`
+- `length_type`
+- `title`
+- `text` (medium/long interview-style content)
 
-2. **Data Cleaning and Preparation**
-   - Merge issue-level text with report-level metadata and firm identifiers.
-   - Remove duplicates and boilerplate language (e.g., “Lobbying on behalf of…”).
-   - Tokenize and segment long lobbying texts for transformer input.
-   - Match each text entry with firm-level ideology labels.
+### 2. `fake_firm_interviews_cleaned.csv`
+Cleaned version of the text data
 
-3. **Model Training**
-   - Fine-tune **RoBERTa-base** using Hugging Face `transformers`.
-   - Treat ideology prediction as a **regression task** (continuous scores).
-   - Train and evaluate on the **BlueHive HPC cluster** at the University of Rochester.
-   - Apply firm-level holdouts and entity masking to prevent memorization.
+### 2. `synthetic_pac_contributions.csv`
+Synthetic PAC donation dataset with:
+- `company`
+- `pac_total`
+- `pac_to_dems`
+- `pac_to_reps`
+- `ideology_score` (scaled from −1 conservative → +1 liberal)
 
-4. **Evaluation and Interpretation**
-   - Evaluate predictive performance using Pearson correlation and MSE.
-   - Apply **SHAP** and **Integrated Gradients** to identify key ideological terms.
-   - Visualize framing differences across major policy domains (trade, environment, taxation, etc.).
+### 3. `training_data.csv`
+Merged dataset combining interview text + ideology score for training.
 
 ---
 
-## 🧱 Repository Structure (Planned)
+## 🧪 Methods Summary
 
-obbyview_ideology_project/
+### **1. Data Generation**
+Scripts:
+- `synthetic_data.py`
+- `synthetic_PAC.py`
+
+These create reproducible synthetic datasets tied to 60 fixed U.S. firms across multiple industries.
+
+### **2. Text Cleaning**
+`clean_text.py`  
+Removes noise, boilerplate, formatting artifacts, and normalizes text.
+
+### **3. Merging Data**
+`merge_interview_pac.py`  
+Per-company merge to align text with ideology labels.
+
+### **4. Model Training (RoBERTa Fine-Tuning)**
+`train_roberta_regression.py`
+
+- Uses **HuggingFace Transformers**
+- Converts ideology to a **continuous regression target**
+- Applies train/validation split
+- Evaluates loss, RMSE, and correlation
+- GPU-compatible (BlueHive cluster or local CUDA)
+
+### **5. Model Interpretability**
+`integrated_gradients.py`
+
+- Uses **Captum** to compute token-level attribution
+- Identifies which words/sentences signal ideological leaning
+- Produces interpretable heatmaps
+
+---
+
+project-root/
 │
 ├── data/
-│ ├── raw/ # Original LobbyView CSVs (report, issue, text)
-│ ├── processed/ # Cleaned, tokenized, and merged datasets
-│ └── metadata/ # Firm identifiers and ideology scores
+│   ├── fake_firm_interviews.csv
+│   ├── fake_pac_data.csv
+│   ├── fake_firm_interviews_cleaned.csv
+│   └── training_data.csv
 │
-├── notebooks/
-│ ├── 01_data_cleaning.ipynb # Text cleaning and preprocessing
-│ ├── 02_merge_datasets.ipynb # Merge text and ideology data
-│ ├── 03_finetune_roberta.ipynb # Model fine-tuning and evaluation
-│ └── 04_interpretability.ipynb # SHAP/IG analysis and visualizations
+├── scripts/
+│   ├── generate_synthetic_interviews.py
+│   ├── generate_synthetic_pac.py
+│   ├── merge_interview_pac.py
+│   ├── text_cleaning.py
+│   ├── train_roberta_regression.py
+│   └── integrated_gradients.py
 │
-├── src/
-│ ├── data_preprocessing.py # Text and metadata cleaning functions
-│ ├── model_training.py # RoBERTa fine-tuning pipeline
-│ ├── interpretability.py # SHAP & Integrated Gradients scripts
-│ └── utils.py # Logging and helper functions
-│
-├── slurm_scripts/
-│ ├── finetune_roberta.slurm # BlueHive GPU training job script
-│ └── preprocess_data.slurm # Data preparation batch job
-│
-├── results/
-│ ├── figures/ # Plots and interpretability visualizations
-│ ├── tables/ # Model metrics and summary results
-│ └── model_checkpoints/ # Fine-tuned model weights
-│
-├── README.md # Project overview and structure (this file)
-└── requirements.txt # Python dependencies
+├── README.md
+├── requirements.txt
+├── Progress_Report.pdf
+└── Project_Plan.tex
+
 
