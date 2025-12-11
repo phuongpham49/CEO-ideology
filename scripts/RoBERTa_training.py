@@ -14,7 +14,7 @@ from torch.utils.data import Dataset
 # ======================================================
 # 1. LOAD MERGED DATA
 # ======================================================
-df = pd.read_csv("training_data.csv")
+df = pd.read_csv("data/training_data.csv")
 
 # Ensure no missing values
 df = df.dropna(subset=["text", "ideology_score"])
@@ -50,7 +50,7 @@ print("Test:", test_df.shape)
 model_name = "roberta-base"
 tokenizer = RobertaTokenizer.from_pretrained(model_name)
 
-MAX_LENGTH = 256  # You can increase to 512 if you have GPU memory
+MAX_LENGTH = 256  
 
 
 class IdeologyDataset(Dataset):
@@ -150,3 +150,5 @@ print("\nFinal Test Results:", results)
 # Save model
 trainer.save_model("./trained_roberta_ideology")
 print("\nModel saved successfully.")
+
+
